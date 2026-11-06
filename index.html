@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chiptick – make retro chiptune music in your browser</title>
+<meta name="description" content="Chiptick is a free little studio for making retro chiptune music in your browser. Draw notes, arrange patterns, mix instruments and export your song as WAV.">
+<meta name="theme-color" content="#0a0d1a">
+<meta property="og:title" content="Chiptick – retro chiptune studio">
+<meta property="og:description" content="Make retro chiptune music right in your browser. Free, no install.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230a0d1a'/%3E%3Crect x='10' y='38' width='12' height='12' fill='%23ff3d7f'/%3E%3Crect x='26' y='26' width='12' height='12' fill='%23ffc857'/%3E%3Crect x='42' y='14' width='12' height='12' fill='%23ff3d7f'/%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#0a0d1a;--panel:#121730;--panel2:#1b2247;--line:#2f3a6b;--text:#e8ecff;--dim:#9aa6da;--hot:#ff3d7f;--gold:#ffc857;--cell:#171d3b;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;overflow-x:hidden;background:var(--bg);color:var(--text);font:400 16px/1.55 'Chakra Petch','Trebuchet MS',system-ui,sans-serif}
+a{color:var(--gold)}
+.glow{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.glow i{position:absolute;border-radius:50%;filter:blur(90px);opacity:.42;will-change:transform}
+.glow i:nth-child(1){width:46vw;height:46vw;max-width:620px;max-height:620px;left:-8vw;top:-10vw;background:var(--hot);animation:fl1 26s ease-in-out infinite alternate}
+.glow i:nth-child(2){width:40vw;height:40vw;max-width:540px;max-height:540px;right:-8vw;top:12vh;background:#7a4dff;animation:fl2 31s ease-in-out infinite alternate}
+.glow i:nth-child(3){width:34vw;height:34vw;max-width:460px;max-height:460px;left:28vw;bottom:-14vw;background:var(--gold);opacity:.26;animation:fl3 36s ease-in-out infinite alternate}
+.glow i:nth-child(4){width:28vw;height:28vw;max-width:380px;max-height:380px;right:22vw;bottom:8vh;background:#2f9dff;opacity:.3;animation:fl4 29s ease-in-out infinite alternate}
+@keyframes fl1{to{transform:translate(18vw,22vh) scale(1.15)}}
+@keyframes fl2{to{transform:translate(-22vw,18vh) scale(.9)}}
+@keyframes fl3{to{transform:translate(-20vw,-24vh) scale(1.2)}}
+@keyframes fl4{to{transform:translate(14vw,-20vh) scale(1.1)}}
+.wrap{position:relative;z-index:1}
+:focus-visible{outline:2px solid var(--hot);outline-offset:3px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font-weight:700;font-size:22px;letter-spacing:.02em;text-decoration:none;color:var(--text)}
+.logo i{display:inline-block;width:10px;height:10px;background:var(--hot);margin-right:8px;box-shadow:12px -8px 0 var(--gold),24px -16px 0 var(--hot)}
+.logo span{margin-left:26px}
+nav a{margin-left:18px;color:var(--dim);text-decoration:none;font-size:14px}nav a:hover{color:var(--text)}
+.hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:40px;align-items:center;padding:36px 0 64px}
+h1{font-size:clamp(38px,6vw,66px);line-height:1.02;margin:0 0 18px;font-weight:700;letter-spacing:-.01em}
+.lead{font-size:18px;color:var(--dim);max-width:46ch;margin:0 0 28px}
+.go{display:inline-block;background:var(--hot);color:#fff;font-weight:700;font-size:22px;text-decoration:none;padding:14px 34px;border-radius:6px;box-shadow:0 5px 0 #a8174d;transition:transform .08s,box-shadow .08s}
+.go:hover{transform:translateY(2px);box-shadow:0 3px 0 #a8174d}
+.go:active{transform:translateY(5px);box-shadow:0 0 0 #a8174d}
+.sub{margin:16px 0 0;font-size:13px;color:var(--dim)}
+.seq{background:rgba(18,23,48,.78);backdrop-filter:blur(6px);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.seq h2{margin:0;display:flex;align-items:center;gap:12px;padding:8px 12px;font-size:13px;font-weight:600;color:var(--dim);background:var(--panel2);border-bottom:1px solid var(--line)}
+.seq h2 b{color:var(--text);margin-right:auto}
+.seq button{background:var(--bg);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:5px 12px;font:600 13px 'Chakra Petch',sans-serif;cursor:pointer}
+.seq button.on{background:var(--hot);border-color:transparent}
+.grid{display:grid;grid-template-columns:54px repeat(16,1fr);gap:3px;padding:12px;align-items:center}
+.grid span{font-size:11px;color:var(--dim)}
+.c{aspect-ratio:1;border-radius:3px;border:1px solid var(--panel);background:var(--cell);padding:0;cursor:pointer}
+.c.lit{background:var(--ac)}.c.now{outline:2px solid var(--gold);outline-offset:-2px}
+.c:nth-child(4n+2){border-left-color:var(--line)}
+.note{margin:0;padding:0 12px 12px;font-size:12px;color:var(--dim)}
+section.block{padding:56px 0;border-top:1px solid var(--line)}
+h2.t{font-size:clamp(26px,4vw,38px);line-height:1.1;margin:0 0 10px}
+.intro{margin:0 0 30px;color:var(--dim);max-width:56ch}
+.shots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+figure{margin:0}
+.frame{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:rgba(18,23,48,.85);box-shadow:0 12px 36px rgba(0,0,0,.45)}
+.frame b{display:flex;gap:6px;padding:8px 10px;background:var(--panel2);border-bottom:1px solid var(--line)}
+.frame b i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.frame img{display:block;width:100%;height:auto}
+.miss .frame img{display:none}
+.ph{display:none;aspect-ratio:16/10;place-items:center;text-align:center;padding:20px;color:var(--dim);font-size:13px}
+.miss .ph{display:grid}
+figcaption{margin-top:10px;font-size:14px;color:var(--dim)}figcaption b{color:var(--text)}
+.feat{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px 30px;margin:0;padding:0;list-style:none}
+.feat li{border-left:3px solid var(--ac);padding-left:14px}
+.feat b{display:block;margin-bottom:3px}
+.feat span{color:var(--dim);font-size:15px}
+.final{text-align:center;padding:72px 0 80px;border-top:1px solid var(--line)}
+.final h2{font-size:clamp(28px,4.5vw,44px);margin:0 0 22px}
+footer{padding:22px 0 34px;border-top:1px solid var(--line);color:var(--dim);font-size:13px;text-align:center}
+.beta{display:inline-block;padding:1px 7px;border-radius:999px;background:var(--gold);color:#1a1300;font-size:11px;font-weight:700;vertical-align:middle;margin-left:6px}
+@media(max-width:860px){.hero{grid-template-columns:minmax(0,1fr)}.shots{grid-template-columns:minmax(0,1fr)}.feat{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.feat{grid-template-columns:minmax(0,1fr)}nav{display:none}.grid{grid-template-columns:44px repeat(16,1fr);gap:2px;padding:8px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.go{transition:none}.glow i{animation:none}}
+</style></head>
+<body>
+<div class="glow" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+<div class="wrap">
+<header><a class="logo" href="./"><i></i><span>Chiptick</span></a><nav><a href="#screens">Screenshots</a><a href="#features">What you get</a></nav></header>
+
+<main>
+<div class="hero">
+ <div>
+  <h1>Make chiptune music in your browser.</h1>
+  <p class="lead">Chiptick is a small studio for retro game music. Draw notes, stack drums, bass and melody, arrange your song and export it. Free, no sign-up, nothing to install.</p>
+  <a class="go" href="chiptick.html">Make music!</a>
+  <p class="sub">Works on desktop. Your songs are saved in your browser.</p>
+ </div>
+ <div class="seq" aria-label="Try a beat">
+  <h2><b>Try a beat</b><button id="pl" aria-pressed="false">▶ Play</button><button id="cl">Clear</button></h2>
+  <div class="grid" id="grid"></div>
+  <p class="note">Click the squares to add or remove notes. This is a tiny taste of the real thing.</p>
+ </div>
+</div>
+
+<section class="block" id="screens">
+ <h2 class="t">See inside the studio</h2>
+ <p class="intro">Every part is hands-on: click to place notes, drag to arrange, slide to mix.</p>
+ <div class="shots">
+  <figure><div class="frame"><b><i></i><i></i><i></i></b><img src="screenshots/piano-roll.png" alt="Chiptick piano roll with colourful notes" loading="lazy" onerror="this.closest('figure').classList.add('miss')"><div class="ph">Add your screenshot as<br>screenshots/piano-roll.png</div></div><figcaption><b>Piano roll.</b> Click to add notes. Snap to scale keeps everything in tune.</figcaption></figure>
+  <figure><div class="frame"><b><i></i><i></i><i></i></b><img src="screenshots/playlist.png" alt="Chiptick playlist arranging patterns into a song" loading="lazy" onerror="this.closest('figure').classList.add('miss')"><div class="ph">Add your screenshot as<br>screenshots/playlist.png</div></div><figcaption><b>Playlist.</b> Place patterns in slots to build a full song.</figcaption></figure>
+  <figure><div class="frame"><b><i></i><i></i><i></i></b><img src="screenshots/mixer.png" alt="Chiptick mixer with volume and pan for each instrument" loading="lazy" onerror="this.closest('figure').classList.add('miss')"><div class="ph">Add your screenshot as<br>screenshots/mixer.png</div></div><figcaption><b>Mixer.</b> Set volume, position, brightness and mute for every instrument.</figcaption></figure>
+  <figure><div class="frame"><b><i></i><i></i><i></i></b><img src="screenshots/generator.png" alt="Chiptick song generator window" loading="lazy" onerror="this.closest('figure').classList.add('miss')"><div class="ph">Add your screenshot as<br>screenshots/generator.png</div></div><figcaption><b>Song generator.</b> Pick a style and mood to get a starting song <span class="beta">Experimental</span></figcaption></figure>
+ </div>
+</section>
+
+<section class="block" id="features">
+ <h2 class="t">What you get</h2>
+ <p class="intro">Everything you need to go from an empty screen to a finished tune.</p>
+ <ul class="feat">
+  <li style="--ac:var(--hot)"><b>Retro instruments</b><span>Lead, bass, drums, organ, bell, pluck and effects, all made in the browser.</span></li>
+  <li style="--ac:var(--gold)"><b>Piano roll</b><span>Draw notes, drag to resize, select areas, copy and paste.</span></li>
+  <li style="--ac:#5ee08a"><b>Playlist</b><span>Arrange short patterns into a complete song.</span></li>
+  <li style="--ac:#58b7ff"><b>Mixer and echo</b><span>Balance every instrument and add a little echo.</span></li>
+  <li style="--ac:var(--hot)"><b>Song generator</b><span>Get a starting song fast, then change any note.</span></li>
+  <li style="--ac:var(--gold)"><b>Save and export</b><span>Save your project, or export as WAV or ZIP.</span></li>
+ </ul>
+</section>
+
+<section class="final">
+ <h2>Ready to write your first tune?</h2>
+ <a class="go" href="chiptick.html">Make music!</a>
+</section>
+</main>
+<footer>Chiptick is free to use. Found a bug? Use the Feedback button inside the studio.</footer>
+</div>
+
+<script>
+(()=>{
+const rows=[
+ {n:'Lead',f:880,w:'square',c:'#ff3d7f',p:'x...x.x.....x...'},
+ {n:'Lead',f:659,w:'square',c:'#ff3d7f',p:'..x.....x.x.....'},
+ {n:'Lead',f:523,w:'square',c:'#ff3d7f',p:'......x...x...x.'},
+ {n:'Bass',f:110,w:'triangle',c:'#ffc857',p:'x..x..x.x..x..x.'},
+ {n:'Snare',f:0,w:'snare',c:'#58b7ff',p:'....x.......x...'},
+ {n:'Kick',f:0,w:'kick',c:'#5ee08a',p:'x.......x.x.....'}];
+const g=document.getElementById('grid'),S=rows.map(r=>[...r.p].map(ch=>ch==='x'));
+let cells=[];
+rows.forEach((r,i)=>{const l=document.createElement('span');l.textContent=r.n;g.appendChild(l);cells[i]=[];
+ for(let s=0;s<16;s++){const b=document.createElement('button');b.className='c'+(S[i][s]?' lit':'');b.style.setProperty('--ac',r.c);b.setAttribute('aria-label',r.n+' step '+(s+1));b.setAttribute('aria-pressed',S[i][s]);
+  b.onclick=()=>{S[i][s]=!S[i][s];b.classList.toggle('lit',S[i][s]);b.setAttribute('aria-pressed',S[i][s]);if(!tm)hit(i)};g.appendChild(b);cells[i][s]=b}});
+let ac=null,nb=null,tm=0,st=0;
+function ctx(){if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();nb=ac.createBuffer(1,ac.sampleRate/4,ac.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1}if(ac.state==='suspended')ac.resume();return ac}
+function hit(i){const c=ctx(),r=rows[i],t=c.currentTime,g=c.createGain();g.connect(c.destination);
+ if(r.w==='kick'){const o=c.createOscillator();o.frequency.setValueAtTime(160,t);o.frequency.exponentialRampToValueAtTime(40,t+.14);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);o.start(t);o.stop(t+.18)}
+ else if(r.w==='snare'){const s=c.createBufferSource(),f=c.createBiquadFilter();f.type='highpass';f.frequency.value=1800;s.buffer=nb;s.connect(f);f.connect(g);g.gain.setValueAtTime(.25,t);g.gain.exponentialRampToValueAtTime(.001,t+.12);s.start(t);s.stop(t+.14)}
+ else{const o=c.createOscillator();o.type=r.w;o.frequency.value=r.f;g.gain.setValueAtTime(r.w==='square'?.07:.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.16);o.connect(g);o.start(t);o.stop(t+.18)}}
+function step(){cells.forEach((row,i)=>{row[(st+15)%16].classList.remove('now');row[st].classList.add('now');if(S[i][st])hit(i)});st=(st+1)%16}
+const pl=document.getElementById('pl');
+function stop(){clearInterval(tm);tm=0;cells.forEach(r=>r.forEach(c=>c.classList.remove('now')));pl.textContent='▶ Play';pl.classList.remove('on');pl.setAttribute('aria-pressed','false')}
+pl.onclick=()=>{if(tm){stop();return}ctx();st=0;step();tm=setInterval(step,135);pl.textContent='■ Stop';pl.classList.add('on');pl.setAttribute('aria-pressed','true')};
+document.getElementById('cl').onclick=()=>{S.forEach((r,i)=>r.forEach((_,s)=>{r[s]=false;cells[i][s].classList.remove('lit');cells[i][s].setAttribute('aria-pressed','false')}))};
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&tm)stop()});
+})();
+</script>
+</body></html>
