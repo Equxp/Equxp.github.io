@@ -25,7 +25,7 @@ button:hover{border-color:var(--dim)}
 button:focus-visible,select:focus-visible,input:focus-visible,canvas:focus-visible{outline:2px solid var(--hot);outline-offset:1px}
 .on{background:var(--hot);color:#fff;border-color:transparent}
 .seg{display:flex}.seg button{border-radius:0}.seg button:first-child{border-radius:4px 0 0 4px}.seg button:last-child{border-radius:0 4px 4px 0}
-.lcd{background:#0b0e1c;color:#ffc857;border:1px solid var(--line);border-radius:4px;padding:1px 10px;font-weight:700;font-size:20px;min-width:80px;text-align:center}
+.lcd{background:#0b0e1c;color:#ffc857;border:1px solid var(--line);border-radius:4px;padding:1px 10px;font-weight:700;font-size:20px;width:150px;min-width:150px;flex:none;box-sizing:border-box;white-space:pre;overflow:hidden;font-variant-numeric:tabular-nums;text-align:center}
 canvas#scope{background:#0b0e1c;border:1px solid var(--line);border-radius:4px;width:140px;height:34px}
 .layout{display:grid;grid-template-columns:190px minmax(0,1fr);gap:10px;padding:10px}
 .col{display:grid;gap:10px;min-width:0;align-content:start}
@@ -91,18 +91,18 @@ footer{position:sticky;bottom:0;z-index:5;padding:7px 12px;background:var(--pane
 .bar{height:14px;background:var(--bg);border:1px solid var(--line);overflow:hidden}.bar i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--hot) 0 8px,#ff8fb0 8px 10px);transition:width .2s}
 .ren{width:100%;padding:5px 6px;background:var(--bg);color:var(--text);border:1px solid var(--hot);border-radius:4px;font:inherit}
 button,select,input[type=number],.pn,.grp,.st{border-radius:2px}
-@media (max-width:860px){.layout{grid-template-columns:1fr}.top{gap:6px 8px}.lcd{font-size:16px}}
+@media (max-width:860px){.layout{grid-template-columns:1fr}.top{gap:6px 8px}.lcd{font-size:16px;width:126px;min-width:126px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style></head><body>
 <div class="top">
- <a class="logo" href="/" title="Back to main page" aria-label="Chiptick, back to main page"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="12" fill="#1b2247"/><rect x="10" y="38" width="12" height="12" fill="#ff3d7f"/><rect x="26" y="26" width="12" height="12" fill="#ffc857"/><rect x="42" y="14" width="12" height="12" fill="#ff3d7f"/></svg>Chiptick</a>
+ <a class="logo" href="index.html" title="Back to main page" aria-label="Chiptick, back to main page"><svg width="30" height="30" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="12" fill="#1b2247"/><rect x="10" y="38" width="12" height="12" fill="#ff3d7f"/><rect x="26" y="26" width="12" height="12" fill="#ffc857"/><rect x="42" y="14" width="12" height="12" fill="#ff3d7f"/></svg>Chiptick</a>
  <div class="grp"><h4>Play</h4><div class="r"><div class="seg"><button id="play">▶ Play</button><button id="stop">■ Stop</button></div><div class="lcd" id="pos">1.1</div><canvas id="scope" width="280" height="68"></canvas></div></div>
  <div class="grp"><h4>What to play</h4><div class="r"><div class="seg"><button id="mSong">Song</button><button id="mPat">Pattern</button></div></div></div>
  <div class="grp"><h4>Song settings</h4><div class="r"><label>Tempo<input id="bpm" type="number" min="60" max="220"></label><label>Key<select id="root"></select></label><label>Scale<select id="scale"></select></label></div></div>
  <div class="grp"><h4>Sound</h4><div class="r"><label>Master volume<input id="master" type="range" min="0" max="1" step=".01"></label><label>Echo<input id="echo" type="range" min="0" max=".7" step=".01"></label></div></div>
  <div class="grp"><h4>Ideas</h4><div class="r"><button id="rand">Randomize…<span class="beta">Experimental</span></button></div><p class="xnote">Still in development, results may be unexpected. <a class="rpt" href="#" role="button">Report a problem</a></p></div>
- <div class="grp"><h4>Windows</h4><div class="r"><div class="seg"><button id="bPl">Playlist</button><button id="bMx">Mixer</button><button id="bHelp">Help</button><button id="bTour">Tutorial</button></div></div></div>
  <div class="grp"><h4>Feedback</h4><div class="r"><button id="feedBtn" class="feedbtn">Feedback / Report Bug</button></div></div>
+ <div class="grp"><h4>Windows</h4><div class="r"><div class="seg"><button id="bPl">Playlist</button><button id="bMx">Mixer</button><button id="bHelp">Help</button><button id="bTour">Tutorial</button></div></div></div>
  <div class="grp"><h4>File</h4><div class="r"><button id="new">New+</button><button id="save">Save</button><button id="load">Load</button><button id="exp">Export WAV</button><button id="expz">Export ZIP</button><input id="file" type="file" accept=".chtk,.json,application/json" hidden></div></div>
 </div>
 <div class="layout">
@@ -166,10 +166,11 @@ function eng(c){
  CH.forEach(([k])=>{const g=c.createGain(),p=c.createStereoPanner();g.connect(p);p.connect(E.master);if(['lead','pluck','bell','fx'].includes(k))g.connect(E.send);E.str[k]=g;E.pan[k]=p});
  const b=c.createBuffer(1,c.sampleRate,c.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;E.nb=b;mix(E);return E}
 function mix(E){if(!E)return;E.master.gain.value=S.master;E.wet.gain.value=S.echo;E.dly.delayTime.value=60/S.bpm*.75;CH.forEach(([k])=>{const C=S.ch[k];E.str[k].gain.value=C.mute?0:C.vol;E.pan[k].pan.value=C.pan})}
+const RELS={lead:.05,chip:.02,bass:.04,pluck:.1,pad:.5,sub:.04,organ:.35,bell:.2};
 function note(E,k,t,m,d){
- const c=E.c,C=S.ch[k],f=440*2**((m-69)/12),g=c.createGain(),fl=c.createBiquadFilter(),cut=300*48**C.tone;
- fl.type='lowpass';fl.Q.value=2;fl.connect(g);g.connect(E.str[k]);
- const O=(ty,fr,dt)=>{const o=c.createOscillator();o.type=ty;o.frequency.value=fr;o.detune.value=dt||0;o.connect(fl);o.start(t);o.stop(t+d+2);return o};
+ const c=E.c,C=S.ch[k],f=440*2**((m-69)/12),g=c.createGain(),fl=c.createBiquadFilter(),cut=300*48**C.tone,tl=Math.min(2,Math.max(.12,(RELS[k]||.2)*6));
+ fl.type='lowpass';fl.Q.value=2;fl.connect(g);g.connect(E.str[k]);if(E.gc)E.gc.push([t+d+tl+.15,g,fl]);
+ const O=(ty,fr,dt)=>{const o=c.createOscillator();o.type=ty;o.frequency.value=fr;o.detune.value=dt||0;o.connect(fl);o.start(t);o.stop(t+d+tl);return o};
  const env=(v,a,dc,su,re)=>{g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.setTargetAtTime(v*su,t+a,dc);g.gain.setTargetAtTime(0,t+d,re)};
  const fe=x=>{fl.frequency.setValueAtTime(Math.min(cut*x,18000),t);fl.frequency.exponentialRampToValueAtTime(cut,t+.2)};
  if(k==='lead'){fe(2.5);env(.2,.006,.12,.6,.05);O('sawtooth',f,-7);O('sawtooth',f,7)}
@@ -178,17 +179,17 @@ function note(E,k,t,m,d){
  else if(k==='pluck'){fe(5);env(.25,.002,.18,.05,.1);O('sawtooth',f);O('triangle',f*2)}
  else if(k==='pad'){fe(1);env(.1,.25,.4,.8,.5);O('sawtooth',f,-10);O('sawtooth',f);O('sawtooth',f,10)}
  else if(k==='sub'){fl.Q.value=9;fl.frequency.setValueAtTime(cut*3+400,t);fl.frequency.exponentialRampToValueAtTime(Math.max(90,cut*.35),t+.14);env(.4,.003,.12,.45,.04);O('sawtooth',f);O('square',f,6);O('sine',f/2)}
- else if(k==='organ'){fe(1);env(.13,.14,.3,.85,.35);const a=O('triangle',f,-9),b=O('triangle',f,9);O('square',f);const lf=c.createOscillator(),lg=c.createGain();lf.frequency.value=4.5+Math.random();lg.gain.value=9;lf.connect(lg);lg.connect(a.detune);lg.connect(b.detune);lf.start(t);lf.stop(t+d+2)}
- else{fe(1);env(.18,.002,.25,.02,.2);const car=O('sine',f),mo=c.createOscillator(),mg=c.createGain();mo.frequency.value=f*3.5;mg.gain.setValueAtTime(f*2.5,t);mg.gain.exponentialRampToValueAtTime(f*.05,t+.6);mo.connect(mg);mg.connect(car.frequency);mo.start(t);mo.stop(t+d+2)}}
+ else if(k==='organ'){fe(1);env(.13,.14,.3,.85,.35);const a=O('triangle',f,-9),b=O('triangle',f,9);O('square',f);const lf=c.createOscillator(),lg=c.createGain();lf.frequency.value=4.5+Math.random();lg.gain.value=9;lf.connect(lg);lg.connect(a.detune);lg.connect(b.detune);lf.start(t);lf.stop(t+d+tl)}
+ else{fe(1);env(.18,.002,.25,.02,.2);const car=O('sine',f),mo=c.createOscillator(),mg=c.createGain();mo.frequency.value=f*3.5;mg.gain.setValueAtTime(f*2.5,t);mg.gain.exponentialRampToValueAtTime(f*.05,t+.6);mo.connect(mg);mg.connect(car.frequency);mo.start(t);mo.stop(t+d+tl)}}
 function drum(E,t,i){
- const c=E.c,g=c.createGain();g.connect(E.str.drums);
+ const c=E.c,g=c.createGain();g.connect(E.str.drums);if(E.gc)E.gc.push([t+.6,g]);
  const nz=(type,f,q)=>{const s=c.createBufferSource(),fl=c.createBiquadFilter();s.buffer=E.nb;fl.type=type;fl.frequency.value=f;fl.Q.value=q||1;s.connect(fl);fl.connect(g);s.start(t,Math.random()*.5);s.stop(t+.3)};
  const osc=(ty,a,b,l)=>{const o=c.createOscillator();o.type=ty;o.frequency.setValueAtTime(a,t);o.frequency.exponentialRampToValueAtTime(b,t+l);o.connect(g);o.start(t);o.stop(t+.4)};
  if(i===0){osc('sine',160,42,.14);g.gain.setValueAtTime(.9,t);g.gain.exponentialRampToValueAtTime(.001,t+.35)}
  else if(i===1){osc('triangle',220,130,.08);nz('highpass',1200);g.gain.setValueAtTime(.5,t);g.gain.exponentialRampToValueAtTime(.001,t+.18)}
  else if(i===2){nz('bandpass',1600,1.2);g.gain.setValueAtTime(.6,t);g.gain.linearRampToValueAtTime(.05,t+.01);g.gain.setValueAtTime(.6,t+.012);g.gain.linearRampToValueAtTime(.05,t+.022);g.gain.setValueAtTime(.55,t+.025);g.gain.exponentialRampToValueAtTime(.001,t+.16)}
  else{nz('highpass',7500);g.gain.setValueAtTime(.28,t);g.gain.exponentialRampToValueAtTime(.001,t+.05)}}
-function fx(E,t,i){const c=E.c,g=c.createGain();g.connect(E.str.fx);
+function fx(E,t,i){const c=E.c,g=c.createGain();g.connect(E.str.fx);if(E.gc)E.gc.push([t+1.2,g]);
  const nz=(f0,f1,l,q)=>{const s=c.createBufferSource(),fl=c.createBiquadFilter();s.buffer=E.nb;fl.type=f1===f0?'highpass':'bandpass';fl.Q.value=q;fl.frequency.setValueAtTime(f0,t);if(f1!==f0)fl.frequency.exponentialRampToValueAtTime(f1,t+l);s.connect(fl);fl.connect(g);s.start(t,Math.random()*.3);s.stop(t+l+.05)};
  const os=()=>{const o=c.createOscillator();o.type='square';o.connect(g);o.start(t);o.stop(t+.3);return o};
  if(i===0){const o=os();o.frequency.setValueAtTime(2600,t);o.frequency.exponentialRampToValueAtTime(140,t+.22);g.gain.setValueAtTime(.22,t);g.gain.exponentialRampToValueAtTime(.001,t+.24)}
@@ -509,8 +510,10 @@ async function render(){
  const ui=(p,t)=>{if(RC.id!==my)return;$('rbar').style.width=p+'%';$('rst').textContent=t};
  RC.on=1;$('rgo').disabled=true;$('rgo').textContent='Rendering…';ui(2,'Rendering… 0%');
  try{const sd=60/S.bpm/4,steps=L*PL(),sr=44100,dur=steps*sd+2.5,oc=new OfflineAudioContext(2,Math.ceil(sr*dur),sr),E=eng(oc);
-  for(let g=0;g<steps;g++)trig(E,g*sd,evAt(g,'song'),sd);
-  for(let i=1;i<24;i++)oc.suspend(dur*i/24).then(()=>{if(RC.id!==my)return;const p=Math.round(i/24*92);ui(p,'Rendering… '+p+'%');oc.resume()}).catch(()=>{});
+  E.gc=[];const CK=1,nck=Math.ceil(dur/CK);let gd=0;
+  const feed=T=>{const g1=Math.min(steps,Math.ceil(T/sd));for(let g=gd;g<g1;g++)trig(E,g*sd,evAt(g,'song'),sd);gd=Math.max(gd,g1)};
+  feed(CK*3);
+  for(let i=1;i<nck;i++)oc.suspend(i*CK).then(()=>{if(RC.id!==my)return;feed((i+3)*CK);E.gc=E.gc.filter(x=>{if(x[0]<i*CK){for(let j=1;j<x.length;j++)try{x[j].disconnect()}catch(e){}return false}return true});const p=Math.round(i/nck*92);ui(p,'Rendering… '+p+'%');oc.resume()}).catch(()=>{});
   const b=await new Promise((res,rej)=>{RC.stop=()=>res(null);oc.startRendering().then(res,rej)});
   if(!b||RC.id!==my)return;
   ui(95,'Encoding…');await new Promise(r=>setTimeout(r,30));if(RC.id!==my)return;
